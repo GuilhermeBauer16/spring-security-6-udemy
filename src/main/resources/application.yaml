@@ -1,0 +1,23 @@
+security:
+  jwt:
+    token:
+      secret-key: ${SECRET_KEY}
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3308/app_security?useTimezone=true&serverTimezone=UTC
+    username: root
+    password: 1234
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+
+    show-sql: false
+
+  logging:
+    level:
+      org.springframework.security: DEBUG
+  main:
+    allow-bean-definition-overriding: true
