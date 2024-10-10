@@ -1,10 +1,14 @@
 package com.debugandoides.app_security.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -23,21 +27,22 @@ public class SecurityConfig {
 
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Autowired
+    SecurityFilterChain securityFilterChain(HttpSecurity http,JWTValidationFilter jwtValidationFilter) throws Exception {
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName("_csrf");
         http.cors(cors -> corsConfigurationSource())
                 .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler)
-                        .ignoringRequestMatchers("*")
+                        .ignoringRequestMatchers("/authenticate/**")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-
-                .addFilterBefore(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
-                .addFilterBefore(new ApiKeyFilter(), BasicAuthenticationFilter.class)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(jwtValidationFilter, BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(
                         auth -> auth.requestMatchers("/cards/**",
                                         "/loans/**",
                                         "/accounts/**",
-                                        "/balance/**").authenticated()
+                                        "/balance/**").hasRole("ADMIN")
                                 .anyRequest().permitAll()
                 )
                 .formLogin(Customizer.withDefaults())
@@ -48,7 +53,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
@@ -64,6 +69,12 @@ public class SecurityConfig {
 
         return urlBasedCorsConfigurationSource;
 
+
+    }
+
+    @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
 
     }
 }
