@@ -10,14 +10,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
 @Service
-public class JwtDetailService implements UserDetailsService {
+public class CustomUserDetails implements UserDetailsService {
 
     private CustomerRepository customerRepository;
 
     @Autowired
-    public JwtDetailService(CustomerRepository customerRepository) {
+    public CustomUserDetails(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
 
