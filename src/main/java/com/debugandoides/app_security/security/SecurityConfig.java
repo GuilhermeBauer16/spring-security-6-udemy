@@ -41,7 +41,14 @@ import java.util.stream.Collectors;
 @Configuration
 public class SecurityConfig {
 
-
+    private static final String[] USER_RESOURCES = {"/loans/**", "/balance/**"};
+    private static final String[] ADMIN_RESOURCES = {"/accounts/**", "/cards/**"};
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_USER = "USER";
+    private static final String LOGIN_RESOURCE = "/login";
+    private static final String RSA = "RSA";
+    private static final Integer RSA_SIZE = 2048;
+    private static final String APPLICATION_OWNER = "Debuggeando ideas";
 
     @Bean
     @Order(1)
